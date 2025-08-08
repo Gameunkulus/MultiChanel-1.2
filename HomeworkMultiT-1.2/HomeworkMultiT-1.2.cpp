@@ -6,9 +6,10 @@
 #include <thread>
 #include <chrono>
 
-void sum(float& vecSum, std::vector<int> vec1, std::vector<int> vec2) {
-    for (int i = 0; i < vec1.size(); i++) {
-        vecSum = vec1.at(i) + vec2.at(i);
+void sumOfVec(float& vecSum, std::vector<int> newVec1, std::vector<int> newVec2) {
+    for (int i = 0; i < newVec1.size(); i++) 
+    {
+        vecSum = newVec1.at(i) + newVec2.at(i);
     }
 }
 
@@ -29,7 +30,7 @@ int main()
             vec1.resize(countV, 2);
             vec2.resize(countV, 4);
             std::vector<std::thread> threads;
-            double sumOfVectors = 0;
+            double vecSum = 0;
 
             int partOfSize = static_cast<int>(countV / countT);
             auto thrStart = std::chrono::high_resolution_clock::now();
@@ -51,7 +52,7 @@ int main()
                     newVec2.push_back(vec2.at(j));
                 }
 
-                threads.push_back(std::thread(sumOfVectors, std::ref(sumOfVectors), newVec1, newVec2));
+                threads.push_back(std::thread(sumOfVec, std::ref(vecSum), newVec1, newVec2));
             }
             for (auto& it : threads)
             {
