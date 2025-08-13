@@ -6,15 +6,16 @@
 #include <thread>
 #include <chrono>
 
-void sumOfVec(float& vecSum, std::vector<int> newVec1, std::vector<int> newVec2) {
-    for (int i = 0; i < newVec1.size(); i++) 
+void sumOfVec(std::vector<int> vecSum, std::vector<int> newVec1, std::vector<int> newVec2, int firNum, int secNum) {
+    for (int i = firNum; i < secNum; i++) 
     {
-        vecSum = newVec1.at(i) + newVec2.at(i);
+        vecSum.at(i) = newVec1.at(i) + newVec2.at(i);
     }
 }
 
 int main()
 {
+    setlocale(LC_CTYPE, "rus");
     std::cout << "Количество аппаратных ядер: " << std::thread::hardware_concurrency() << std::endl;
     std::cout << "          " << "1000" << "          " << "10'000" << "          " << "100'000" << "          " << "1000'000" << std::endl;
     std::vector<int> vec1;
@@ -23,36 +24,34 @@ int main()
 
     std::vector<int> sizeOfVector{ 1000,10000,100000,1000000};
 
+    std::vector<int> vecSum;
+
     for (auto& countT : numOfThreads) {
-        std::cout << " потоков ";
+        std::cout << " потоков " << countT;
 
         for (auto& countV : sizeOfVector) {
             vec1.resize(countV, 2);
             vec2.resize(countV, 4);
             std::vector<std::thread> threads;
-            double vecSum = 0;
+            vecSum.resize(countV, 0);
 
             int partOfSize = static_cast<int>(countV / countT);
             auto thrStart = std::chrono::high_resolution_clock::now();
             for (int i = 0; i < countT; i++) 
             {
-                std::vector<int> newVec1;
-                std::vector<int> newVec2;
+                int leftBorder = 0;
                 int rightBorder = 0;
 
                 if (i != countT - 1) {
-                    rightBorder = partOfSize * (i + 1);
+                    leftBorder = rightBorder;
+                    rightBorder = partOfSize * (i - 1);
                 }
                 else {
+                    leftBorder = rightBorder;
                     rightBorder = countV;
                 }
 
-                for (int j = partOfSize * i; j < rightBorder; ++j) {
-                    newVec1.push_back(vec1.at(j));
-                    newVec2.push_back(vec2.at(j));
-                }
-
-                threads.push_back(std::thread(sumOfVec, std::ref(vecSum), newVec1, newVec2));
+                threads.push_back(std::thread(sumOfVec, vecSum, vec1, vec2, leftBorder,rightBorder));
             }
             for (auto& it : threads)
             {
